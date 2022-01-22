@@ -1,5 +1,5 @@
 -- Create database
-CREATE DTAABASE react_crud;
+CREATE DATABASE react_crud;
 
 -- Create users table
 CREATE TABLE `react_crud`.`users`
