@@ -8,8 +8,7 @@ export default function ListUser() {
     const [inputs, setInputs] = useState([]);
 
     const handleChange = (event) => {
-        const name = event.target.name;
-        const value = event.target.value;
+        const { name, value } = e.target;
         setInputs(values => ({...values, [name]: value}));
     }
     const handleSubmit = (event) => {
