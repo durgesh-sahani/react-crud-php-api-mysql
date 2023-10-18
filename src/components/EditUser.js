@@ -1,77 +1,72 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import FormControl from "@mui/material/FormControl";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { Grid } from "@mui/material";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
-export default function ListUser() {
-    const navigate = useNavigate();
+function EditUser() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [inputs, setInputs] = useState({ name: "", email: "", mobile: "" });
 
-    const [inputs, setInputs] = useState([]);
-
-    const {id} = useParams();
-
-    useEffect(() => {
-        getUser();
-    }, []);
-
-    function getUser() {
-        axios.get(`http://localhost:8888/api/user/${id}`).then(function(response) {
-            console.log(response.data);
-            setInputs(response.data);
-        });
+  const getUserDetails = useCallback(async () => {
+    try {
+      const response = await axios.get(`http://localhost:8888/api/user/${id}`);
+      const userData = response.data;
+      setInputs(userData);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
     }
+  }, [id]);
 
-    const handleChange = (event) => {
-        const name = event.target.name;
-        const value = event.target.value;
-        setInputs(values => ({...values, [name]: value}));
+  useEffect(() => {
+    if (id) {
+      getUserDetails();
     }
-    const handleSubmit = (event) => {
-        event.preventDefault();
+  }, [id, getUserDetails]);
 
-        axios.put(`http://localhost:8888/api/user/${id}/edit`, inputs).then(function(response){
-            console.log(response.data);
-            navigate('/');
-        });
-        
+  const handleChange = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setInputs((prev) => {
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const submitHandle = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await axios.put(`http://localhost:8888/api/user/${id}`, inputs);
+      console.log(response.data);
+      navigate('/');
+    } catch (error) {
+      console.error("Error Editing user:", error);
     }
-    return (
-        <div>
-            <h1>Edit user</h1>
-            <form onSubmit={handleSubmit}>
-                <table cellSpacing="10">
-                    <tbody>
-                        <tr>
-                            <th>
-                                <label>Name: </label>
-                            </th>
-                            <td>
-                                <input value={inputs.name} type="text" name="name" onChange={handleChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <label>Email: </label>
-                            </th>
-                            <td> 
-                                <input value={inputs.email} type="text" name="email" onChange={handleChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <label>Mobile: </label>
-                            </th>
-                            <td>
-                                <input value={inputs.mobile} type="text" name="mobile" onChange={handleChange} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colSpan="2" align ="right">
-                                <button>Save</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form>
-        </div>
-    )
+  };
+
+  return (
+    <>
+      <Grid container justifyContent="center" alignItems="center">
+        <Grid item>
+          <h5>Create User</h5>
+          <form onSubmit={submitHandle}>
+            <FormControl>
+              <TextField size="large" helperText="Please enter your name" id="name" label="Name" name='name' value={inputs.name} onChange={handleChange} />
+              <TextField size="large" helperText="Please enter your Email" id="email" label="Email" name='email' value={inputs.email} onChange={handleChange} />
+              <TextField size="large" helperText="Please enter your Mobile" id="mobile" label="Mobile" name='mobile' value={inputs.mobile} onChange={handleChange} />
+              <Button size="large" type="submit" variant="contained" name='save'>
+                Submit
+              </Button>
+            </FormControl>
+          </form>
+        </Grid>
+      </Grid>
+    </>
+  );
 }
+
+export default EditUser;
